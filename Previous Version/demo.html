@@ -21,7 +21,6 @@
         <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
         <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
         <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
-
         <style>
           html, body {
             overflow: hidden;
@@ -42,48 +41,37 @@
             var canvas = document.getElementById("render");
             var engine = new BABYLON.Engine(canvas, true);
             var arr = [];
-
-
             var createScene = function() {
                 var scene = new BABYLON.Scene(engine);
                     var multiplier = 17;
-                    // light
-                    //
+
                     //scene.enablePhysics(new BABYLON.Vector3(0,-9.8,0), new BABYLON.AmmoJSPlugin());
                     //button
-
-
                     // Fire light, simulates the fire intensity
                     var firelight = new BABYLON.SpotLight("spot", new BABYLON.Vector3(16, 2, 37), new BABYLON.Vector3(0, -1, 0), 4, 2, scene);
-                    firelight.diffuse = new BABYLON.Color3(1.0, 0.5, 0.0);
-                    firelight.intensity = 0.7;
-                    firelight.range = 50;
+                      firelight.diffuse = new BABYLON.Color3(1.0, 0.5, 0.0);
+                      firelight.intensity = .7;
+                      firelight.range = 30;
+                      var keys = [];
+                      var previous = null;
+                      for (var i = 0; i < 20; i++) {
+                          var rand = BABYLON.Scalar.Clamp(Math.random(), 0.5, 1.0);
+                          if (previous) {
+                              if (Math.abs(rand - previous) < 0.1) {
+                                  continue;
+                              }
+                          }
+                          previous = rand;
+                          keys.push({
+                              frame: i,
+                              value: rand
+                          });
 
-                    var keys = [];
-                    var previous = null;
-                    for (var i = 0; i < 20; i++) {
-                        var rand = BABYLON.Scalar.Clamp(Math.random(), 0.5, 1.0);
-
-                        if (previous) {
-                            if (Math.abs(rand - previous) < 0.1) {
-                                continue;
-                            }
-                        }
-                        previous = rand;
-                        keys.push({
-                            frame: i,
-                            value: rand
-                        });
-
-
-
-                    var anim = new BABYLON.Animation("anim", "intensity", 1, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-                    anim.setKeys(keys);
-
-                    firelight.animations.push(anim);
-                    scene.beginAnimation(firelight, 0, keys.length, true, 8);
+                      var anim = new BABYLON.Animation("anim", "intensity", 1, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                      anim.setKeys(keys);
+                      firelight.animations.push(anim);
+                      scene.beginAnimation(firelight, 0, keys.length, true, 8);
                   }
-
                     // var lightSphere0 = BABYLON.Mesh.CreateSphere("Sphere0", 16, 0.5, scene);
                     //
                     // lightSphere0.position = new BABYLON.Vector3(-22.6, 5.5, 12.4);
@@ -97,7 +85,7 @@
                     light.intensity = 0.7;
                     light.diffuse = new BABYLON.Color3(1, 1, 1);
                     light.specular = new BABYLON.Color3(0, 0, 0);
-                    light.range = 70
+                    light.range = 60;
 
                     //bathroom
                     // var light3 = new BABYLON.SpotLight("spt1", new BABYLON.Vector3(25, 6, 27), new BABYLON.Vector3(0, -1, 0), 6, 2, scene);
@@ -116,9 +104,7 @@
                     light2.intensity = 0.7;
                     light2.range = 60;
 
-
-
-                    //bedroom2
+                  //bedroom2
                     // var light0 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(28, 5, -15), new BABYLON.Vector3(0, -1, 0), 3, 2, scene);
                     // light0.diffuse = new BABYLON.Color3(1, 1, 1);
                     // light0.specular = new BABYLON.Color3(0, 0, 0);
@@ -137,17 +123,13 @@
                     shadowGenerator2 = spawnShadow(light2);
                     shadowGenerator3 = spawnShadow(firelight);
                     shadowGenerator4 = spawnShadow(light4);
-
-
                     // camera
-                    var camera = new BABYLON.FlyCamera("Camera", new BABYLON.Vector3(0, 5.569, 0), scene); // AWSD
+                    var camera = new BABYLON.FlyCamera("Camera", new BABYLON.Vector3(30, 5.569, 0), scene); // AWSD
                     //var camera = new BABYLON.ArcRotateCamera("Camera", 0, Math.PI / 2, 10, new BABYLON.Vector3.Zero(), scene);
                     camera.attachControl(canvas, true);
                     camera.maxCameraSpeed =  0.4;
                     camera.speed = .35;
                     camera.rollCorrect = 10;
-
-
                     // gravity
                     scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
                     camera.applyGravity = true;
@@ -248,9 +230,10 @@
                     var reflector = new BABYLON.Plane.FromPositionAndNormal(mirror.position, mirrorNormal.scale(-1));
 
                     function meshSetup(name, newMeshes, x, y, z, rotation, scale, bool){
-                      var mesh = BABYLON.Mesh.CreateSphere(name, 10, 20, scene);
+                      var mesh = BABYLON.Mesh.CreateSphere(name, 1, 1, scene);
                         mesh.checkCollisions =  false;
                         mesh.isVisible = false;
+
                         arr.push(mesh);
                         for (i = 0; i < newMeshes.length; i++)
                         {
@@ -266,6 +249,10 @@
                           mesh.rotation.y = rotation;
                           mesh.position = new BABYLON.Vector3(x*multiplier, y, z*multiplier);
                           mesh.scaling = new BABYLON.Vector3(scale*multiplier, scale*multiplier, scale*multiplier);
+                          if (name == "door")
+                          {
+                            newMeshes[i].position.z = .5;
+                          }
                         }
                         linkMesh(mesh);
                         return mesh;
@@ -341,8 +328,8 @@
                    BABYLON.SceneLoader.ImportMesh("", "Import/Door/", "door-dorian-stradivari-01-konjak.obj", scene, function(newMeshes) {
                         //table
                         door = meshSetup("door", newMeshes, 1.5, floor.position.y, .8, Math.PI/2, .5, true);
-                        openDoor(door);
-
+                      //  openDoor(door);
+                        dooranime(door);
 
                   });
                     var mirrormaterial = new BABYLON.StandardMaterial("texture4", scene);
@@ -396,26 +383,47 @@
                     objectiive = text("Objectives:", "white", 24, "Times", "bold", "-700px","-300px");
                     task = text(objectives, "white", 20, "Times", "", "-680px","-270px");
 
+                    //door animations
+                    function dooranime(door){
 
-
-                    function openDoor(mesh){
-                      mesh.setPivotMatrix(BABYLON.Matrix.Translation(0 ,0, .5));
-                      scene.registerAfterRender(function() {
-                        var flag = 0;
-                        if ((map["e"]) || (map["E"]))  {
-                          if( BABYLON.Vector3.Distance(camera.position,mesh.position)<20 && pickResult.pickedMesh.parent == mesh){
-                            //console.log(mesh.name);
-                              for (i = 0; i < 15; i++){
-                                mesh.rotate(BABYLON.Axis.Y, -Math.PI / 64, BABYLON.Space.LOCAL);
-                                if (i > 15){
-                                  mesh.rotate(BABYLON.Axis.Y, Math.PI / 64, BABYLON.Space.LOCAL);
-                                }
-                                }
-                              }
-                          }
-
+                    var frameRate = 20;
+                    var sweep = new BABYLON.Animation("sweep", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                      var sweep_keys = [];
+                      sweep_keys.push({
+                          frame: 1* frameRate,
+                          value:Math.PI/2
                       });
+
+                      sweep_keys.push({
+                          frame: 3 * frameRate,
+                          value: Math.PI/2
+                      });
+
+                      sweep_keys.push({
+                          frame: 5 * frameRate,
+                          value: 0
+                      });
+
+                      sweep_keys.push({
+                          frame: 13 * frameRate,
+                          value: 0
+                      });
+
+                      sweep_keys.push({
+                          frame: 15 * frameRate,
+                          value: Math.PI/2
+                      });
+                      sweep.setKeys(sweep_keys);
+                      scene.registerBeforeRender(function() {
+                        if ((map["e"]) || (map["E"])) {
+                          if(pickResult.pickedMesh.parent == door && BABYLON.Vector3.Distance(camera.position, door.position)<20){
+                            console.log("test");
+                              scene.beginDirectAnimation(door, [sweep], 0, 25 * frameRate, false);
+                            }
+                          }
+                        });
                     }
+
                     function linkMesh(mesh) {
                           var rect1 = new BABYLON.GUI.Rectangle();
                             rect1.width = 0.1;
@@ -476,7 +484,6 @@
                     var width = scene.getEngine().getRenderWidth();
                     var height = scene.getEngine().getRenderHeight();
 
-
                     var i = 3;//timecounter
 
                     function textmesh(mesh, text2){
@@ -510,21 +517,16 @@
                     }
 
                     scene.registerAfterRender(function () {
-                        //console.log(camera.position);
-
                     		pickResult = scene.pick(width/2, height/2,
                                         function(mesh) { return mesh.isVisible && mesh.isReady()},
                                         false,
                                         camera);
-
                         if ((map["e"]) || (map["E"])){
                             textmesh(table, "Try");
-
                         }
                         if ((map["Shift"])) {
                             camera.maxCameraSpeed =  .75;
                             camera.speed = .65;
-
                             }
                         else{
                           camera.maxCameraSpeed =  0.3;
