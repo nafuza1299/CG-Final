@@ -549,12 +549,14 @@
                         if(bookevent == 1){task.text = "- Investigate the painting";};
                         if(bathevent == 1){task.text = "- Find the key to the bathroom";};
                         if(paintingevent == 2){task.text = "- Investigate the bathroom";};
+                        if(bathevent == 3){task.text = "- Game Completed";};
                         if(bathevent == 2)
                         {
                           task.text = "- Open the bathroom door";
                           desc_door.text = "Door is unlocked";
                         }
                         if(pickResult.pickedMesh == mirror&&endgamecount==0){
+                          bathevent = 3;
                           endgame=true;
                           endgamecount=1;
                         }
